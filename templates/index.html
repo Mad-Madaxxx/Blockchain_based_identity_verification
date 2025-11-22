@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Blockchain Identity Verification{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to Blockchain Identity Verification</h1>
+    <p class="subtitle">Secure, decentralized identity verification system</p>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <h3>🔑 Create Identity</h3>
+        <p>Create your decentralized identity (DID) with cryptographic keys</p>
+        <a href="/create-identity" class="btn btn-primary">Create Identity</a>
+    </div>
+    
+    <div class="feature-card">
+        <h3>📜 Issue Credentials</h3>
+        <p>Issue verifiable credentials to users</p>
+        <a href="/issue-credential" class="btn btn-primary">Issue Credential</a>
+    </div>
+    
+    <div class="feature-card">
+        <h3>✅ Verify Credentials</h3>
+        <p>Verify the authenticity of credentials</p>
+        <a href="/verify-credential" class="btn btn-primary">Verify Credential</a>
+    </div>
+    
+    <div class="feature-card">
+        <h3>📋 View Credentials</h3>
+        <p>View all your issued or received credentials</p>
+        <a href="/view-credentials" class="btn btn-primary">View Credentials</a>
+    </div>
+</div>
+
+<div class="info-section">
+    <h2>How It Works</h2>
+    <div class="steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h4>Create Identity</h4>
+            <p>Generate a unique decentralized identifier (DID) with public/private key pair</p>
+        </div>
+        <div class="step">
+            <div class="step-number">2</div>
+            <h4>Issue Credentials</h4>
+            <p>Issuers create and sign digital credentials for recipients</p>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <h4>Store on Blockchain</h4>
+            <p>Credential hashes are stored on the blockchain for verification</p>
+        </div>
+        <div class="step">
+            <div class="step-number">4</div>
+            <h4>Verify</h4>
+            <p>Anyone can verify credentials by checking signatures and blockchain records</p>
+        </div>
+    </div>
+</div>
+
+<div class="blockchain-status">
+    <h2>Blockchain Status</h2>
+    <div id="blockchain-info" class="status-card">
+        <p>Loading...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Load blockchain status on page load
+    fetch('/api/blockchain/status')
+        .then(response => response.json())
+        .then(data => {
+            const infoDiv = document.getElementById('blockchain-info');
+            infoDiv.innerHTML = `
+                <p><strong>Chain Length:</strong> ${data.chain_length} blocks</p>
+                <p><strong>Pending Transactions:</strong> ${data.pending_transactions}</p>
+                <p><strong>Chain Valid:</strong> ${data.is_valid ? '✅ Yes' : '❌ No'}</p>
+                <p><strong>Difficulty:</strong> ${data.difficulty}</p>
+            `;
+        })
+        .catch(error => {
+            document.getElementById('blockchain-info').innerHTML = '<p>Error loading blockchain status</p>';
+        });
+</script>
+{% endblock %}
+

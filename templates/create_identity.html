@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Create Identity - Blockchain Identity Verification{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Create New Identity</h1>
+    <p>Generate a decentralized identity with cryptographic keys</p>
+</div>
+
+<div class="form-container">
+    <form id="create-identity-form">
+        <div class="form-group">
+            <label for="name">Full Name *</label>
+            <input type="text" id="name" name="name" required placeholder="Enter your full name">
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" required placeholder="Enter your email">
+        </div>
+        
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" name="role">
+                <option value="user">User</option>
+                <option value="issuer">Issuer</option>
+                <option value="verifier">Verifier</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Create Identity</button>
+    </form>
+</div>
+
+<div id="result" class="result-container" style="display: none;">
+    <h3>Identity Created Successfully!</h3>
+    <div class="result-box">
+        <p><strong>DID:</strong> <span id="result-did"></span></p>
+        <p><strong>Name:</strong> <span id="result-name"></span></p>
+        <p><strong>Email:</strong> <span id="result-email"></span></p>
+        <p><strong>Role:</strong> <span id="result-role"></span></p>
+        <div class="warning-box">
+            <p><strong>⚠️ Important:</strong> Save your private key securely!</p>
+            <textarea id="private-key" readonly class="private-key-box"></textarea>
+            <button onclick="copyPrivateKey()" class="btn btn-secondary">Copy Private Key</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('create-identity-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            role: document.getElementById('role').value
+        };
+        
+        try {
+            const response = await fetch('/api/identity/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('result-did').textContent = data.identity.did;
+                document.getElementById('result-name').textContent = data.identity.name;
+                document.getElementById('result-email').textContent = data.identity.email;
+                document.getElementById('result-role').textContent = data.identity.role;
+                document.getElementById('private-key').value = data.identity.private_key;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('create-identity-form').reset();
+                
+                // Auto mine block
+                fetch('/api/blockchain/mine', { method: 'POST' });
+            } else {
+                alert('Error: ' + (data.error || 'Failed to create identity'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+    
+    function copyPrivateKey() {
+        const privateKeyBox = document.getElementById('private-key');
+        privateKeyBox.select();
+        document.execCommand('copy');
+        alert('Private key copied to clipboard!');
+    }
+</script>
+{% endblock %}
+
